@@ -1,4 +1,4 @@
-import pygame
+from FC import *
 
 
 class RS:

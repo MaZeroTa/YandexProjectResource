@@ -1,7 +1,6 @@
 from FC import *
 from board import Board
 
-
 class Menu:
     def __init__(self):
         pygame.init()

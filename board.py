@@ -1,10 +1,9 @@
-import pygame
-from unit import Unit
 from FC import *
 from city import City
 from resource_station import RS
 from inseec_nest import IN
 from player import Player
+from unit import Unit
 
 
 class Board:
@@ -147,11 +146,11 @@ class Board:
         coords = ((1700, 990), (1900, 990), (1900, 1050), (1700, 1050))
         pygame.draw.polygon(screen, (20, 20, 20), coords)
         font = pygame.font.Font(None, 50)
-        text_surface = font.render(str(self.players['Human'].resuorce), True, 'WHITE')
+        text_surface = font.render(str(int(self.players['Human'].resuorce)), True, 'WHITE')
         text_rect = text_surface.get_rect()
         text_rect.midtop = (1800, 915)
         screen.blit(text_surface, text_rect)
-        text_surface = font.render(str(self.players['Inseec'].resuorce), True, 'WHITE')
+        text_surface = font.render(str(int(self.players['Inseec'].resuorce)), True, 'WHITE')
         text_rect = text_surface.get_rect()
         text_rect.midtop = (1800, 1005)
         screen.blit(text_surface, text_rect)
@@ -164,8 +163,6 @@ class Board:
             coords = ((10, 900), (560, 900), (560, 1060), (10, 1060))
             pygame.draw.polygon(screen, (20, 20, 20), coords)
             coords = ((570, 900), (1120, 900), (1120, 1060), (570, 1060))
-            #pygame.draw.polygon(screen, (20, 20, 20), coords)
-            #coords = ((1130, 900), (1680, 900), (1680, 1060), (1130, 1060))
             pygame.draw.polygon(screen, (20, 20, 20), coords)
         font = pygame.font.Font(None, 80)
         if self.menu in ('City', 'IN'):
@@ -175,17 +172,21 @@ class Board:
             screen.blit(text_surface, text_rect)
             text_surface = font.render('НОВЫЙ УРОВЕНЬ', True, 'WHITE')
             text_rect = text_surface.get_rect()
-            text_rect.midtop = (280, 955)
+            text_rect.midtop = (280, 920)
             screen.blit(text_surface, text_rect)
-            text_surface = font.render('Уровень города: ' + str(self.bildings[self.ab].lvl), True, 'WHITE')
+            text_surface = font.render(f'{int(self.bildings[self.ab].lvl * 50 + 150)}', True, 'WHITE')
+            text_rect = text_surface.get_rect()
+            text_rect.midtop = (280, 980)
+            screen.blit(text_surface, text_rect)
+            text_surface = font.render('Уровень города: ' + str(int(self.bildings[self.ab].lvl)), True, 'WHITE')
             text_rect = text_surface.get_rect()
             text_rect.midtop = (1400, 900)
             screen.blit(text_surface, text_rect)
-            text_surface = font.render('Здоровье: ' + str(self.bildings[self.ab].hp), True, 'WHITE')
+            text_surface = font.render('Здоровье: ' + str(int(self.bildings[self.ab].hp)), True, 'WHITE')
             text_rect = text_surface.get_rect()
             text_rect.midtop = (1400, 970)
             screen.blit(text_surface, text_rect)
-        elif self.menu in ('pehot', 'fleet', 'hight_fleet'):
+        elif self.menu in ('pehot', 'fleet', 'higth_fleet'):
             text_surface = font.render('ПОСТРОИТЬ', True, 'WHITE')
             text_rect = text_surface.get_rect()
             text_rect.midtop = (840, 955)
@@ -260,7 +261,7 @@ class Board:
                     stat = False
                     self.active = None
                 elif (a, b) in self.active[0].alerts_show:
-                    # Ныне реализованный бой
+                    # бой
                     power_1 = self.units[self.active[1]].power
                     power_2 = self.units[self.position_of_unit([b, a])].power
                     type_1 = self.units[self.active[1]].type
@@ -299,24 +300,34 @@ class Board:
                         self.bildings[self.ab].diactivate()
                         self.ab = None
             elif self.units[self.position_of_unit([b, a])].had_been_activated_at_this_hod:
+                # не даёт активироваться ранее активированному юниту
                 pass
             elif self.hod == self.units[self.position_of_unit([b, a])].fraction and stat:
-                # Активация юнита
+                # деактивация ранее активированного юнита
                 if self.active and self.units[self.position_of_unit([b, a])].fraction == self.active[0].fraction:
                     self.active[0].diactivate()
                     self.units[self.active[-1]] = self.active[0]
+                # Активация юнита
                 if not self.units[self.position_of_unit([b, a])].healing:
                     self.active = (self.units[self.position_of_unit([b, a])].copy(), self.position_of_unit([b, a]))
                     self.active[0].activate()
                     self.active[0].render(self.screen)
                     self.units[self.active[-1]] = self.active[0]
         elif self.board[b][a] in (6, 7, 8):
-            # Активация постройки
+            check_coord = [(b, a - 1), (b - 1, a), (b + 1, a), (b, a + 1), (b - 1, a - 1), (b - 1, a + 1),
+                           (b + 1, a + 1), (b + 1, a - 1)]
+            for x, y in check_coord:
+                try:
+                    if x < 0 or y < 0:
+                        raise Exception
+                except Exception as e:
+                    pass
             if self.active and self.hod == self.bildings[self.position_of_bilding((b, a))].fraction:
                 self.active[0].diactivate()
                 self.active = None
-            elif self.active and self.hod != self.bildings[self.position_of_bilding((b, a))].fraction:
-                # Атака юнитом построек
+            elif (self.active and self.hod != self.bildings[self.position_of_bilding((b, a))].fraction
+                  and tuple(reversed(self.active[0].red_alert)) in check_coord):
+                print(12345678)
                 self.bildings[self.position_of_bilding((b, a))].hp -= self.active[0].power
                 if self.bildings[self.position_of_bilding((b, a))].hp <= 0:
                     if self.bildings[self.position_of_bilding((b, a))].type == 'City':
@@ -336,16 +347,19 @@ class Board:
                 self.active = None
             if self.ab:
                 self.bildings[self.ab].diactivate()
+            # Активация постройки
             if self.position_of_bilding((b, a)) and self.board[b][a] != 7:
                 if self.hod == self.bildings[self.position_of_bilding((b, a))].fraction:
                     self.bildings[self.position_of_bilding((b, a))].activate()
                     self.ab = self.position_of_bilding((b, a))
         elif self.active:
             # Перемещение активированного юнита
-            self.active[0].sharik((b, a), stat=True)
-            self.active[0].diactivate()
-            self.units[self.active[-1]] = self.active[0]
-            self.active = None
+            if (a, b) in self.active[0].alerts_show:
+                self.active[0].sharik((b, a), stat=True)
+                self.active[0].had_been_activated_at_this_hod = True
+                self.active[0].diactivate()
+                self.units[self.active[-1]] = self.active[0]
+                self.active = None
 
     def iteration(self):
         screen = self.screen
@@ -353,7 +367,7 @@ class Board:
         if self.ab:
             self.bildings[self.ab].diactivate()
             self.ab = None
-        # Совершение действий юнитов(потом добавлю постройки)
+        # Совершение действий юнитов и построек
         for elem in self.units:
             elem = self.units[elem]
             elem.had_been_activated_at_this_hod = False
@@ -397,6 +411,7 @@ class Board:
         for elem in self.bildings:
             if self.bildings[elem].fraction == self.hod:
                 self.bildings[elem].iteration(self, self.players[self.hod])
+        # строительство построек
         for elem in self.bilder:
             self.board[elem[2]][elem[1]] = elem[0]
             if elem[0] == 6:
@@ -405,31 +420,33 @@ class Board:
                 self.alerts_inseec_nest += 1
             self.bildings_alerts += 1
         self.bilder = []
+        # проверка на конец игры
         if self.alerts_inseec_nest == 0 and self.inseec_alerts == 0:
             self.end_of_game('Human', self.screen)
         elif self.alerts_city == 0 and self.human_alerts == 0:
             self.end_of_game('Inseec', self.screen)
+        # смена хода
         if self.hod == 'Human':
             self.hod = 'Inseec'
         else:
             self.hod = 'Human'
 
     def position_of_unit(self, coord):
-        # Сюда не лезьть
+        # ищет юнита в словаре self.units возвращает ключ к словарю
         coord = [coord[1], coord[0]]
         for elem in self.units:
             if self.units[elem].red_alert == coord:
                 return elem
 
     def position_of_bilding(self, coord):
-        # Сюда не лезьть
+        # ищет постройку в словаре self.bildings возвращает ключ к словарю
         coord = [coord[1], coord[0]]
         for elem in self.bildings:
             if list(self.bildings[elem].position) == coord:
                 return elem
 
     def update_units_data(self):
-        # Сюда не лезьть
+        # Смешные приколюшки для определения позиций юнитов для других юнитов
         self.inseec_alerts = 0
         self.human_alerts = 0
         for elem in self.units:
@@ -452,7 +469,6 @@ class Board:
         if not tob:
             return None
         if self.board[tob[1][0]][tob[1][1]] != 0:
-            print('Армия не может отойти')
             return None
         b, a = self.active[0].red_alert.copy()
         self.active[0].had_been_activated_at_this_hod = True
@@ -494,7 +510,6 @@ class Board:
         data_save.write(stroka)
 
     def read_save(self, save_pos):
-        self.render()
         self.active = None
         self.ab = None
         self.units = dict()
@@ -505,6 +520,12 @@ class Board:
         self.alerts = sum([elem.count(2) + elem.count(4) + elem.count(5) for elem in self.board])
         self.bildings_alerts = sum([elem.count(6) + elem.count(7) + elem.count(8) for elem in self.board])
         count = 0
+        self.water_unit_wall = Unit(self.width, self.height)
+        self.water_unit_wall.set_view(self.left, self.top, self.cell_size)
+        self.rock_unit_wall = Unit(self.width, self.height)
+        self.water_unit_wall.set_view(self.left, self.top, self.cell_size)
+        self.earth_unit_wall = Unit(self.width, self.height)
+        self.water_unit_wall.set_view(self.left, self.top, self.cell_size)
         for elem in eval(data_save[0][:-1]):
             unit = self.water_unit_wall.copy()
             unit.type = elem['type']
@@ -601,4 +622,4 @@ class Board:
                     running = False
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
-                        exit()
+                        vihod()

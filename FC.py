@@ -1,6 +1,6 @@
-# Functions, Consts
+# Functions, Consts, Libs
 import pygame
-import time
+from sys import exit as vihod
 
 
 def readmap(filename, stat=False):
@@ -34,15 +34,15 @@ def menu_of_selecting_type_of_unit(board, position, player, screen, bilding):
     pygame.draw.rect(screen, (20, 20, 20), (780, 430, 360, 160))
     pygame.draw.rect(screen, (20, 20, 20), (780, 610, 360, 160))
     font = pygame.font.Font(None, 70)
-    text_surface = font.render(f'Пехота - {100 * bilding.cop}', True, 'WHITE')
+    text_surface = font.render(f'Пехота - {int(100 * bilding.cop)}', True, 'WHITE')
     text_rect = text_surface.get_rect()
     text_rect.midtop = (960, 310)
     screen.blit(text_surface, text_rect)
-    text_surface = font.render(f'Флот - {200 * bilding.cop}', True, 'WHITE')
+    text_surface = font.render(f'Флот - {int(200 * bilding.cop)}', True, 'WHITE')
     text_rect = text_surface.get_rect()
     text_rect.midtop = (960, 490)
     screen.blit(text_surface, text_rect)
-    text_surface = font.render(f'Авиация - {300 * bilding.cop}', True, 'WHITE')
+    text_surface = font.render(f'Авиация - {int(300 * bilding.cop)}', True, 'WHITE')
     text_rect = text_surface.get_rect()
     text_rect.midtop = (960, 670)
     screen.blit(text_surface, text_rect)
@@ -90,7 +90,7 @@ def menu_of_selecting_type_of_bilding(board, unit, player, screen):
         pygame.draw.rect(screen, (50, 50, 50), (760, 220, 400, 300))
         pygame.draw.rect(screen, (0, 0, 0), (760, 220, 400, 300), 4)
         pygame.draw.rect(screen, (20, 20, 20), (780, 240, 360, 260))
-        text_surface = font.render('Город - 500', True, 'WHITE')
+        text_surface = font.render('Гнездо - 500', True, 'WHITE')
         text_rect = text_surface.get_rect()
         text_rect.midtop = (960, 340)
         screen.blit(text_surface, text_rect)
@@ -218,7 +218,7 @@ def click(pos, vid, board=None):
         if pos[1] in range(240, 311):
             return False
         elif pos[1] in range(340, 411):
-            exit()
+            vihod()
         elif pos[1] in range(440, 511):
             board.read_save(1)
         elif pos[1] in range(540, 611):

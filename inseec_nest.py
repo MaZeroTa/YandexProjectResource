@@ -1,4 +1,5 @@
-import pygame
+from FC import *
+
 
 
 class IN:
@@ -65,7 +66,7 @@ class IN:
         self.price_list = {'pehot': 100 * self.cop, 'fleet': 200 * self.cop, 'higth_fleet': 300 * self.cop}
         self.unit_list = {'pehot': 2, 'fleet': 4, 'higth_fleet': 5}
         place = self.look_around(board, type)
-        if place and type:
+        if place and type and not self.procces:
             if player.resuorce - self.price_list[type] >= 0:
                 self.procces = 2
                 player.resuorce -= self.price_list[type]
@@ -94,14 +95,14 @@ class IN:
             board.alerts += 1
             self.data_for_unit = None
         self.procces = None
-        player.resuorce += 75
+        player.resuorce += 40
         if self.hp + 15 < self.max_hp:
             self.hp += 15
         else:
             self.hp = self.max_hp
 
     def lvl_up(self, player):
-        if player.resuorce - self.lvl * 50 - 150 >= 0:
+        if player.resuorce - self.lvl * 50 - 150 >= 0 and self.lvl != 3 and not self.procces:
             player.resuorce -= self.lvl * 50 + 150
             self.procces = 1
 
